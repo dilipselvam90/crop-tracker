@@ -22,6 +22,8 @@ export type AppAction =
   | { type: 'ADD_EXPENSE'; payload: Expense }
   | { type: 'ADD_INCOME'; payload: Income }
   | { type: 'CLOSE_CROP'; payload: { id: string; endDate?: string } }
+  | { type: 'DELETE_EXPENSE'; payload: { id: string } }
+  | { type: 'DELETE_INCOME'; payload: { id: string } }
   | { type: 'LOAD_STATE'; payload: AppState };
 
 const initialState: AppState = {
@@ -37,16 +39,28 @@ function appReducer(state: AppState, action: AppAction): AppState {
         ...state,
         crops: [...state.crops, action.payload],
       };
-    case 'ADD_EXPENSE':
+    case 'ADD_EXPENSE': {
+      const crop = state.crops.find((c) => c.id === action.payload.cropId);
+      if (crop?.status === 'closed') {
+        return state;
+      }
+
       return {
         ...state,
         expenses: [...state.expenses, action.payload],
       };
-    case 'ADD_INCOME':
+    }
+    case 'ADD_INCOME': {
+      const crop = state.crops.find((c) => c.id === action.payload.cropId);
+      if (crop?.status === 'closed') {
+        return state;
+      }
+
       return {
         ...state,
         incomes: [...state.incomes, action.payload],
       };
+    }
     case 'CLOSE_CROP':
       return {
         ...state,
@@ -59,6 +73,16 @@ function appReducer(state: AppState, action: AppAction): AppState {
               }
             : crop
         ),
+      };
+    case 'DELETE_EXPENSE':
+      return {
+        ...state,
+        expenses: state.expenses.filter((e) => e.id !== action.payload.id),
+      };
+    case 'DELETE_INCOME':
+      return {
+        ...state,
+        incomes: state.incomes.filter((i) => i.id !== action.payload.id),
       };
     case 'LOAD_STATE':
       return action.payload;

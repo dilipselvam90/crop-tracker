@@ -7,10 +7,13 @@ import { useAppContext } from '@/context/AppContext';
 export default function AddIncomeScreen() {
   const { cropId } = useLocalSearchParams<{ cropId: string }>();
   const router = useRouter();
-  const { dispatch } = useAppContext();
+  const { dispatch, state } = useAppContext();
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
+
+  const crop = state.crops.find((c) => c.id === cropId);
+  const cropClosed = crop?.status === 'closed';
 
   const handleSave = () => {
     if (!cropId) {
@@ -19,8 +22,23 @@ export default function AddIncomeScreen() {
     }
 
     const parsedAmount = Number(amount);
-    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
+    if (Number.isNaN(parsedAmount)) {
+      setError('Amount must be numeric.');
+      return;
+    }
+
+    if (parsedAmount <= 0) {
       setError('Amount must be greater than zero.');
+      return;
+    }
+
+    if (!crop) {
+      setError('Crop not found.');
+      return;
+    }
+
+    if (cropClosed) {
+      setError('Cannot add income to a closed crop.');
       return;
     }
 
@@ -64,7 +82,7 @@ export default function AddIncomeScreen() {
       <Button
         title="Save Income"
         onPress={handleSave}
-        disabled={Number.isNaN(Number(amount)) || Number(amount) <= 0}
+        disabled={Number.isNaN(Number(amount)) || Number(amount) <= 0 || cropClosed}
       />
     </View>
   );

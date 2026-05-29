@@ -28,6 +28,12 @@ export default function CropDetailScreen() {
   }
 
   const summary = getCropSummary(cropId, state);
+  const expenses = state.expenses
+    .filter((expense) => expense.cropId === cropId)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const incomes = state.incomes
+    .filter((income) => income.cropId === cropId)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const handleCloseCrop = () => {
     dispatch({
@@ -46,6 +52,43 @@ export default function CropDetailScreen() {
         <Text style={styles.summaryLine}>Total Expense: ${summary.totalExpense.toFixed(2)}</Text>
         <Text style={styles.summaryLine}>Total Income: ${summary.totalIncome.toFixed(2)}</Text>
         <Text style={styles.summaryLine}>Profit: ${summary.profit.toFixed(2)}</Text>
+      </View>
+
+      <View style={styles.expenseListBlock}>
+        <Text style={styles.summaryTitle}>Expenses</Text>
+        {expenses.length === 0 ? (
+          <Text style={styles.placeholderText}>No expenses added</Text>
+          ) : (
+          expenses.map((expense) => (
+            <View key={expense.id} style={styles.row}>
+              <Text style={styles.expenseLine}>
+                {expense.category} - ₹{expense.amount} - {new Date(expense.date).toISOString().split('T')[0]}
+              </Text>
+              <Button
+                title="Delete"
+                onPress={() => dispatch({ type: 'DELETE_EXPENSE', payload: { id: expense.id } })}
+              />
+            </View>
+          ))
+        )}
+      </View>
+      <View style={styles.expenseListBlock}>
+        <Text style={styles.summaryTitle}>Income</Text>
+        {incomes.length === 0 ? (
+          <Text style={styles.placeholderText}>No income added</Text>
+        ) : (
+          incomes.map((income) => (
+            <View key={income.id} style={styles.row}>
+              <Text style={styles.expenseLine}>
+                ₹{income.amount} - {new Date(income.date).toISOString().split('T')[0]}
+              </Text>
+              <Button
+                title="Delete"
+                onPress={() => dispatch({ type: 'DELETE_INCOME', payload: { id: income.id } })}
+              />
+            </View>
+          ))
+        )}
       </View>
 
       <View style={styles.buttonGroup}>
@@ -98,6 +141,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#334155',
     marginBottom: 6,
+  },
+  expenseListBlock: {
+    marginBottom: 24,
+  },
+  expenseLine: {
+    fontSize: 15,
+    color: '#334155',
+    marginBottom: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  placeholderText: {
+    fontSize: 15,
+    color: '#6b7280',
   },
   buttonGroup: {
     marginBottom: 12,
