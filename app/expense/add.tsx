@@ -1,6 +1,8 @@
+import { AppButton } from '@/components/AppButton';
+import { BackButton } from '@/components/back-button';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Button, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useAppContext } from '@/context/AppContext';
 
@@ -77,6 +79,7 @@ export default function AddExpenseScreen() {
 
   return (
     <View style={styles.container}>
+      <BackButton />
       <Text style={styles.label}>Amount</Text>
       <TextInput
         style={styles.input}
@@ -116,12 +119,10 @@ export default function AddExpenseScreen() {
       />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button
+      <AppButton
         title="Save Expense"
         onPress={handleSave}
-        disabled={
-          !category.trim() || Number.isNaN(Number(amount)) || Number(amount) <= 0 || cropClosed
-        }
+        disabled={!category.trim() || Number.isNaN(Number(amount)) || Number(amount) <= 0 || cropClosed}
       />
     </View>
   );

@@ -1,6 +1,7 @@
+import { AppButton } from '@/components/AppButton';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useAppContext } from '@/context/AppContext';
 
@@ -46,7 +47,7 @@ export default function AddCropScreen() {
       <Text style={styles.label}>Start Date</Text>
       <Text style={styles.dateText}>{new Date().toLocaleDateString()}</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button title="Create Crop" onPress={handleCreate} disabled={!name.trim()} />
+      <AppButton title="Create Crop" onPress={handleCreate} disabled={!name.trim()} />
     </View>
   );
 }

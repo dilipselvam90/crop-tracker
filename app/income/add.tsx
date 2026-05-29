@@ -1,6 +1,8 @@
+import { AppButton } from '@/components/AppButton';
+import { BackButton } from '@/components/back-button';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useAppContext } from '@/context/AppContext';
 
@@ -58,6 +60,7 @@ export default function AddIncomeScreen() {
 
   return (
     <View style={styles.container}>
+      <BackButton />
       <Text style={styles.label}>Amount</Text>
       <TextInput
         style={styles.input}
@@ -79,7 +82,7 @@ export default function AddIncomeScreen() {
       />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button
+      <AppButton
         title="Save Income"
         onPress={handleSave}
         disabled={Number.isNaN(Number(amount)) || Number(amount) <= 0 || cropClosed}
