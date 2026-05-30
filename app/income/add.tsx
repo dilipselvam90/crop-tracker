@@ -10,6 +10,7 @@ export default function AddIncomeScreen() {
   const { cropId } = useLocalSearchParams<{ cropId: string }>();
   const router = useRouter();
   const { dispatch, state } = useAppContext();
+
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
@@ -18,20 +19,23 @@ export default function AddIncomeScreen() {
   const crop = state.crops.find((c) => c.id === cropId);
   const cropClosed = crop?.status === 'closed';
 
+  const parsedAmount = Number(amount.trim());
+  const isValidAmount = !Number.isNaN(parsedAmount) && parsedAmount > 0;
+  const isValidCategory = category.trim().length > 0;
+
   const handleSave = () => {
     if (!cropId) {
       setError('Crop ID is required.');
       return;
     }
 
-    const parsedAmount = Number(amount);
-    if (Number.isNaN(parsedAmount)) {
-      setError('Amount must be numeric.');
+    if (!isValidAmount) {
+      setError('Enter valid amount greater than zero.');
       return;
     }
 
-    if (parsedAmount <= 0) {
-      setError('Amount must be greater than zero.');
+    if (!isValidCategory) {
+      setError('Select a category.');
       return;
     }
 
@@ -40,91 +44,96 @@ export default function AddIncomeScreen() {
       return;
     }
 
-    if (!category.trim()) {
-      setError('Income category is required.');
-      return;
-    }
-
     if (cropClosed) {
       setError('Cannot add income to a closed crop.');
       return;
     }
 
+    const newIncome = {
+      id: Date.now().toString(),
+      cropId,
+      category: category.trim(),
+      amount: parsedAmount,
+      date: new Date().toISOString(),
+      note: note.trim(), // always string (cleaner)
+    };
+
     dispatch({
       type: 'ADD_INCOME',
-      payload: {
-        id: Date.now().toString(),
-        cropId,
-        category: category.trim(),
-        amount: parsedAmount,
-        date: new Date().toISOString(),
-        note: note.trim() || undefined,
-      },
+      payload: newIncome,
     });
+
+    // reset (not strictly needed since you navigate away, but safer)
+    setAmount('');
+    setCategory('');
+    setNote('');
+    setError('');
 
     router.push(`/crop/${cropId}`);
   };
 
   return (
     <>
-    <Stack.Screen options={{ title: "Add Income" }} />
-    <View style={styles.container}>
-      <Text style={styles.label}>Amount</Text>
-      <TextInput
-        style={styles.input}
-        value={amount}
-        onChangeText={(value) => {
-          setAmount(value);
-          setError('');
-        }}
-        placeholder="0.00"
-        keyboardType="numeric"
-      />
+      <Stack.Screen options={{ title: 'Add Income' }} />
 
-      <Text style={styles.label}>Category</Text>
-      <View style={styles.categoryContainer}>
-        {INCOME_CATEGORIES.map((cat) => {
-          const selected = category === cat;
-          return (
-            <Pressable
-              key={cat}
-              onPress={() => {
-                setCategory(cat);
-                setError('');
-              }}
-              style={[
-                styles.categoryButton,
-                selected && styles.categorySelected,
-              ]}
-            >
-              <Text
+      <View style={styles.container}>
+        <Text style={styles.label}>Amount</Text>
+        <TextInput
+          style={styles.input}
+          value={amount}
+          onChangeText={(value) => {
+            setAmount(value);
+            setError('');
+          }}
+          placeholder="0.00"
+          keyboardType="numeric"
+        />
+
+        <Text style={styles.label}>Category</Text>
+        <View style={styles.categoryContainer}>
+          {INCOME_CATEGORIES.map((cat) => {
+            const selected = category === cat;
+            return (
+              <Pressable
+                key={cat}
+                onPress={() => {
+                  setCategory(cat);
+                  setError('');
+                }}
                 style={[
-                  styles.categoryButtonText,
-                  selected && styles.categorySelectedText,
+                  styles.categoryButton,
+                  selected && styles.categorySelected,
                 ]}
               >
-                {cat}
-              </Text>
-            </Pressable>
-          );
-        })}
+                <Text
+                  style={[
+                    styles.categoryButtonText,
+                    selected && styles.categorySelectedText,
+                  ]}
+                >
+                  {cat}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Text style={styles.label}>Note</Text>
+        <TextInput
+          style={styles.input}
+          value={note}
+          onChangeText={setNote}
+          placeholder="Optional note"
+        />
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <AppButton
+          title="Save Income"
+          onPress={handleSave}
+          disabled={!isValidAmount || !isValidCategory || cropClosed}
+        />
       </View>
-
-      <Text style={styles.label}>Note</Text>
-      <TextInput
-        style={styles.input}
-        value={note}
-        onChangeText={(value) => setNote(value)}
-        placeholder="Optional note"
-      />
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <AppButton
-        title="Save Income"
-        onPress={handleSave}
-        disabled={Number.isNaN(Number(amount)) || Number(amount) <= 0 || cropClosed}
-      />
-    </View>
     </>
   );
 }

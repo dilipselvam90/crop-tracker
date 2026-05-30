@@ -24,7 +24,7 @@ export default function RootLayout() {
             headerTintColor: '#007bff',
           }}
         >
-          <Stack.Screen name="index" />
+          <Stack.Screen name="Crop Tracker" />
         </Stack>
       </AppProvider>
       <StatusBar style="auto" />
