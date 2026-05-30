@@ -65,13 +65,13 @@ const styles = StyleSheet.create({
     color: '#111',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
     padding: 12,
-    marginBottom: 20,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#dddddd',
     fontSize: 16,
-    backgroundColor: '#f8fafc',
   },
   dateText: {
     fontSize: 16,

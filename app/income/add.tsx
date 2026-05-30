@@ -1,6 +1,5 @@
 import { AppButton } from '@/components/AppButton';
-import { BackButton } from '@/components/back-button';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -59,8 +58,9 @@ export default function AddIncomeScreen() {
   };
 
   return (
+    <>
+    <Stack.Screen options={{ title: "Add Income" }} />
     <View style={styles.container}>
-      <BackButton />
       <Text style={styles.label}>Amount</Text>
       <TextInput
         style={styles.input}
@@ -88,6 +88,7 @@ export default function AddIncomeScreen() {
         disabled={Number.isNaN(Number(amount)) || Number(amount) <= 0 || cropClosed}
       />
     </View>
+    </>
   );
 }
 
@@ -104,13 +105,13 @@ const styles = StyleSheet.create({
     color: '#111',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
     padding: 12,
-    marginBottom: 20,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#dddddd',
     fontSize: 16,
-    backgroundColor: '#f8fafc',
   },
   error: {
     color: '#b91c1c',

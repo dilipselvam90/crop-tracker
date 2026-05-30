@@ -1,7 +1,7 @@
 import { AppButton } from '@/components/AppButton';
-import { BackButton } from '@/components/back-button';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useAppContext } from '@/context/AppContext';
 import { getCropSummary } from '@/utils/calculations';
@@ -107,34 +107,62 @@ export default function CropDetailScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <BackButton />
-      <Text style={styles.title}>{crop.name}</Text>
-      <Text style={styles.detail}>Status: {crop.status}</Text>
+    <>
+      <Stack.Screen options={{ title: crop.name }} />
+      <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+          <Text style={styles.title}>{crop.name}</Text>
+          <Text style={styles.detail}>Status: {crop.status}</Text>
 
-      <View style={styles.summaryBlock}>
-        <Text style={styles.summaryTitle}>Summary</Text>
-        <Text style={styles.summaryLine}>Total Expense: ₹{summary.totalExpense.toFixed(2)}</Text>
-        <Text style={styles.summaryLine}>Total Income: ₹{summary.totalIncome.toFixed(2)}</Text>
-        <Text style={styles.summaryLine}>Profit: ₹{summary.profit.toFixed(2)}</Text>
-      </View>
+          <View style={styles.summaryBlock}>
+            <Text style={styles.summaryTitle}>Summary</Text>
+            <View style={styles.summaryCard}>
+              <View style={styles.summaryRow}>
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Expense</Text>
+                  <Text style={[styles.summaryValue, styles.expenseValue]}>₹{summary.totalExpense.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Income</Text>
+                  <Text style={[styles.summaryValue, styles.incomeValue]}>₹{summary.totalIncome.toFixed(2)}</Text>
+                </View>
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Profit</Text>
+                  <Text
+                    style={[
+                      styles.summaryValue,
+                      summary.profit >= 0 ? styles.incomeValue : styles.expenseValue,
+                    ]}
+                  >
+                    ₹{summary.profit.toFixed(2)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
 
-      <View style={styles.expenseListBlock}>
+          <View style={styles.expenseListBlock}>
         <Text style={styles.summaryTitle}>Expenses</Text>
         {expenses.length === 0 ? (
           <Text style={styles.placeholderText}>No expenses added</Text>
           ) : (
           expenses.map((expense) => (
-            <View key={expense.id} style={styles.row}>
-              <Text style={styles.expenseLine}>
-                {expense.category} - ₹{expense.amount} - {new Date(expense.date).toISOString().split('T')[0]}
-              </Text>
-              <AppButton
-                title="Delete"
+            <View key={expense.id} style={styles.expenseCard}>
+            <View style={styles.expenseCardLeft}>
+              <Text style={styles.expenseCardCategory}>{expense.category}</Text>
+              <Text style={styles.expenseCardDate}>{new Date(expense.date).toISOString().split('T')[0]}</Text>
+            </View>
+            <View style={styles.expenseCardRight}>
+              <Text style={styles.expenseCardAmount}>₹{expense.amount.toFixed(2)}</Text>
+              <Pressable
+                style={styles.deleteIconButton}
                 onPress={() => handleDeleteExpense(expense.id)}
                 disabled={crop.status === 'closed'}
-              />
+              >
+                <Ionicons name="trash-outline" size={18} color="#dc2626" />
+              </Pressable>
             </View>
+          </View>
           ))
         )}
       </View>
@@ -157,37 +185,49 @@ export default function CropDetailScreen() {
           ))
         )}
       </View>
+        </ScrollView>
+      </View>
 
-      <View style={styles.buttonGroup}>
-        <AppButton
-          title="Add Expense"
-          onPress={() => router.push(`/expense/add?cropId=${encodeURIComponent(cropId)}`)}
-          disabled={crop.status === 'closed'}
-        />
-      </View>
-      <View style={styles.buttonGroup}>
-        <AppButton
-          title="Add Income"
-          onPress={() => router.push(`/income/add?cropId=${encodeURIComponent(cropId)}`)}
-          disabled={crop.status === 'closed'}
-        />
-      </View>
-      <View style={styles.buttonGroup}>
-        <AppButton
-          title={crop.status === 'closed' ? 'Crop Closed' : 'Close Crop'}
-          onPress={handleCloseCrop}
-          disabled={crop.status === 'closed'}
-        />
+      <View style={styles.actionFooter}>
+      <View style={styles.footerContent}>
+        <View style={styles.buttonGroup}>
+          <AppButton
+            title="Add Expense"
+            onPress={() => router.push(`/expense/add?cropId=${encodeURIComponent(cropId)}`)}
+            disabled={crop.status === 'closed'}
+            variant="primary"
+          />
+        </View>
+        <View style={styles.buttonGroup}>
+          <AppButton
+            title="Add Income"
+            onPress={() => router.push(`/income/add?cropId=${encodeURIComponent(cropId)}`)}
+            disabled={crop.status === 'closed'}
+            variant="secondary"
+          />
+        </View>
+        <View style={styles.buttonGroup}>
+          <AppButton
+            title={crop.status === 'closed' ? 'Crop Closed' : 'Close Crop'}
+            onPress={handleCloseCrop}
+            disabled={crop.status === 'closed'}
+            variant="danger"
+          />
+        </View>
       </View>
     </View>
+  </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
     backgroundColor: '#fff',
+  },
+  contentContainer: {
+    padding: 24,
+    paddingBottom: 220,
   },
   title: {
     fontSize: 24,
@@ -208,10 +248,44 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 10,
   },
-  summaryLine: {
-    fontSize: 16,
-    color: '#334155',
+  summaryCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  summaryItem: {
+    flex: 1,
+    minWidth: 0,
+    marginRight: 12,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#666666',
     marginBottom: 6,
+  },
+  summaryValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  expenseValue: {
+    color: '#dc2626',
+  },
+  incomeValue: {
+    color: '#16a34a',
   },
   expenseListBlock: {
     marginBottom: 24,
@@ -220,6 +294,70 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#334155',
     marginBottom: 8,
+  },
+  actionFooter: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 24,
+  },
+  footerContent: {
+    backgroundColor: '#ffffff',
+  },
+  expenseCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  expenseCardLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  expenseCardCategory: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  expenseCardDate: {
+    fontSize: 13,
+    color: '#666666',
+  },
+  expenseCardRight: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+  },
+  expenseCardAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#dc2626',
+    marginBottom: 4,
+  },
+  deleteIconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#ffe5e5',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   row: {
     flexDirection: 'row',
