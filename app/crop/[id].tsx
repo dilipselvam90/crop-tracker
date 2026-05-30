@@ -106,6 +106,8 @@ export default function CropDetailScreen() {
     );
   };
 
+  const formatDate = (dateString: string) => new Date(dateString).toISOString().split('T')[0];
+
   return (
     <>
       <Stack.Screen options={{ title: crop.name }} />
@@ -174,8 +176,13 @@ export default function CropDetailScreen() {
           incomes.map((income) => (
             <View key={income.id} style={styles.expenseCard}>
               <View style={styles.expenseCardLeft}>
-                <Text style={styles.expenseCardCategory}>Income</Text>
-                <Text style={styles.expenseCardDate}>{new Date(income.date).toISOString().split('T')[0]}</Text>
+                <Text style={[styles.expenseCardCategory, { fontWeight: '600' }]}>{income.category || 'Other'}</Text>
+                <Text style={styles.expenseCardDate}>{formatDate(income.date)}</Text>
+                {income.note ? (
+                  <Text numberOfLines={2} style={{ color: '#666', fontSize: 12 }}>
+                    {income.note}
+                  </Text>
+                ) : null}
               </View>
               <View style={styles.expenseCardRight}>
                 <Text style={[styles.expenseCardAmount, styles.incomeValue]}>₹{income.amount.toFixed(2)}</Text>

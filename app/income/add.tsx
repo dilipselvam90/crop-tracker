@@ -1,7 +1,8 @@
 import { AppButton } from '@/components/AppButton';
+import { INCOME_CATEGORIES } from '@/constants/incomeCategories';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useAppContext } from '@/context/AppContext';
 
@@ -10,6 +11,7 @@ export default function AddIncomeScreen() {
   const router = useRouter();
   const { dispatch, state } = useAppContext();
   const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
 
@@ -38,6 +40,11 @@ export default function AddIncomeScreen() {
       return;
     }
 
+    if (!category.trim()) {
+      setError('Income category is required.');
+      return;
+    }
+
     if (cropClosed) {
       setError('Cannot add income to a closed crop.');
       return;
@@ -48,6 +55,7 @@ export default function AddIncomeScreen() {
       payload: {
         id: Date.now().toString(),
         cropId,
+        category: category.trim(),
         amount: parsedAmount,
         date: new Date().toISOString(),
         note: note.trim() || undefined,
@@ -72,6 +80,35 @@ export default function AddIncomeScreen() {
         placeholder="0.00"
         keyboardType="numeric"
       />
+
+      <Text style={styles.label}>Category</Text>
+      <View style={styles.categoryContainer}>
+        {INCOME_CATEGORIES.map((cat) => {
+          const selected = category === cat;
+          return (
+            <Pressable
+              key={cat}
+              onPress={() => {
+                setCategory(cat);
+                setError('');
+              }}
+              style={[
+                styles.categoryButton,
+                selected && styles.categorySelected,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  selected && styles.categorySelectedText,
+                ]}
+              >
+                {cat}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
       <Text style={styles.label}>Note</Text>
       <TextInput
@@ -112,6 +149,28 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#dddddd',
     fontSize: 16,
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  categoryButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: '#eeeeee',
+  },
+  categorySelected: {
+    backgroundColor: '#007bff',
+  },
+  categoryButtonText: {
+    color: '#333333',
+    fontSize: 14,
+  },
+  categorySelectedText: {
+    color: '#ffffff',
   },
   error: {
     color: '#b91c1c',
