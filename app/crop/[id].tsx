@@ -169,18 +169,24 @@ export default function CropDetailScreen() {
       <View style={styles.expenseListBlock}>
         <Text style={styles.summaryTitle}>Income</Text>
         {incomes.length === 0 ? (
-          <Text style={styles.placeholderText}>No income added</Text>
+          <Text style={[styles.placeholderText, { color: '#666' }]}>No income added</Text>
         ) : (
           incomes.map((income) => (
-            <View key={income.id} style={styles.row}>
-              <Text style={styles.expenseLine}>
-                ₹{income.amount} - {new Date(income.date).toISOString().split('T')[0]}
-              </Text>
-              <AppButton
-                title="Delete"
-                onPress={() => handleDeleteIncome(income.id)}
-                disabled={crop.status === 'closed'}
-              />
+            <View key={income.id} style={styles.expenseCard}>
+              <View style={styles.expenseCardLeft}>
+                <Text style={styles.expenseCardCategory}>Income</Text>
+                <Text style={styles.expenseCardDate}>{new Date(income.date).toISOString().split('T')[0]}</Text>
+              </View>
+              <View style={styles.expenseCardRight}>
+                <Text style={[styles.expenseCardAmount, styles.incomeValue]}>₹{income.amount.toFixed(2)}</Text>
+                <Pressable
+                  style={styles.deleteIconButton}
+                  onPress={() => handleDeleteIncome(income.id)}
+                  disabled={crop.status === 'closed'}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#dc2626" />
+                </Pressable>
+              </View>
             </View>
           ))
         )}
@@ -352,9 +358,8 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   deleteIconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    padding: 6,
+    borderRadius: 20,
     backgroundColor: '#ffe5e5',
     alignItems: 'center',
     justifyContent: 'center',
